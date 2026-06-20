@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}Taksi: {{ user.first_name or user.telegram_id }} – Xabarchi Bot{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block page_title %}Foydalanuvchi kartasi{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+
+    <!-- BACK BUTTON -->
+    <a href="/admin/users" class="btn btn-sm btn-outline-accent mb-4">
+        <i class="bi bi-arrow-left me-1"></i> Ro'yxatga qaytish
+    </a>
+
+    <div class="row g-4">
+        <!-- LEFT COLUMN: USER CARD & STATS -->
+        <div class="col-lg-4">
+            <!-- User Info Card -->
+            <div class="info-card mb-4">
+                <div class="card-header-custom">
+                    <i class="bi bi-person-badge-fill" style="color: var(--accent);"></i>
+                    Taksi ma'lumotlari
+                </div>
+                <div class="info-item">
+                    <span class="label">Telegram ID</span>
+                    <span class="value" style="font-family: monospace;">{{ user.telegram_id }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Foydalanuvchi nomi</span>
+                    <span class="value">
+                        {% if user.username %}
+                            <a href="https://t.me/{{ user.username }}" target="_blank" style="color: var(--info); text-decoration: none;">
+                                @{{ user.username }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Ismi</span>
+                    <span class="value">{{ user.first_name or '—' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Telefon raqam</span>
+                    <span class="value" style="font-family: monospace;">{{ user.phone_number or 'Kiritilmagan' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Til</span>
+                    <span class="value">
+                        {% if user.language == 'uz_lat' %}🇺🇿 Lotin{% elif user.language == 'uz_cyr' %}🇺🇿 Кирилл{% else %}<span class="text-muted">Tanlanmagan</span>{% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Akkaunt ulangan</span>
+                    <span class="value">
+                        {% if user.session_string %}
+                            <span class="status-badge badge-active">✓ Ha</span>
+                        {% else %}
+                            <span class="status-badge badge-new">✗ Yo'q</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Ro'yxatdan o'tdi</span>
+                    <span class="value" style="font-size: 13px;">{{ user.created_at[:16] | replace("T", " ") if user.created_at else '—' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Holat</span>
+                    <span class="value">
+                        {% if user.status == 'active' %}
+                            <span class="status-badge badge-active">Faol</span>
+                        {% elif user.status == 'blocked' %}
+                            <span class="status-badge badge-blocked">Bloklangan</span>
+                        {% elif user.status == 'new' %}
+                            <span class="status-badge badge-new">Yangi</span>
+                        {% else %}
+                            <span class="status-badge badge-trial">{{ user.status }}</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="info-card">
+                <div class="card-header-custom">
+                    <i class="bi bi-bar-chart-line-fill" style="color: var(--success);"></i>
+                    Xabarlar statistikasi
+                </div>
+                <div class="info-item">
+                    <span class="label">Yuborilgan reklama</span>
+                    <span class="value text-success" style="font-size: 18px; font-weight: 700;">{{ stats.sent_count if stats else 0 }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Xatoliklar soni</span>
+                    <span class="value text-danger" style="font-size: 18px; font-weight: 700;">{{ stats.failed_count if stats else 0 }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Qolgan sinov xabarlar</span>
+                    <span class="value text-warning" style="font-size: 16px; font-weight: 700;">{{ user.trial_messages_left }} / {{ free_trial }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Tanlangan guruhlar</span>
+                    <span class="value">{{ active_group_count }} / {{ groups|length }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">So'nggi faollik</span>
+                    <span class="value" style="font-size: 13px; color: var(--text-muted);">
+                        {{ stats.last_updated[:16] | replace("T", " ") if stats and stats.last_updated else '—' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: ACTIONS -->
+        <div class="col-lg-8">
+            <!-- STATUS / RESTRICTIONS -->
+            <div class="info-card mb-4">
+                <div class="card-header-custom">
+                    <i class="bi bi-shield-lock-fill" style="color: var(--warning);"></i>
+                    Holat va cheklovlar
+                </div>
+
+                <!-- Hozirgi cheklovlar ko'rinishi -->
+                <div class="mb-4 p-3 rounded" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);">
+                    <div class="info-item">
+                        <span class="label">Obuna muddati</span>
+                        <span class="value">
+                            {% if user.subscription_end %}
+                                <span class="text-success">{{ user.subscription_end[:16] | replace("T", " ") }} gacha</span>
+                            {% else %}
+                                <span class="text-danger">Faol obuna yo'q</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Vaqtinchalik blok</span>
+                        <span class="value">
+                            {% if user.blocked_until %}
+                                <span class="text-danger">🔴 {{ user.blocked_until[:16] | replace("T", " ") }} gacha</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Reklama bloki</span>
+                        <span class="value">
+                            {% if user.msg_blocked_until %}
+                                <span class="text-danger">🔴 {{ user.msg_blocked_until[:16] | replace("T", " ") }} gacha</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="action-grid">
+                    <!-- Full block / unblock -->
+                    <div class="action-box">
+                        <div class="action-label"><i class="bi bi-toggle-on"></i> Akkaunt holati</div>
+                        {% if user.status == 'blocked' %}
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/unblock">
+                            <button type="submit" class="btn btn-success w-100" style="border-radius:10px; font-weight:600;">
+                                <i class="bi bi-unlock-fill me-1"></i> Blokdan chiqarish
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/block"
+                              data-confirm="Foydalanuvchini butunlay bloklashni tasdiqlaysizmi?">
+                            <button type="submit" class="btn btn-danger w-100" style="border-radius:10px; font-weight:600;">
+                                <i class="bi bi-lock-fill me-1"></i> Bloklash
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Temp block -->
+                    <div class="action-box">
+                        <div class="action-label"><i class="bi bi-clock-history"></i> Vaqtinchalik blok (soat)</div>
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/temp-block">
+                            <div class="input-group">
+                                <input type="number" name="hours" class="form-control" placeholder="24" min="1" required>
+                                <button type="submit" class="btn btn-outline-accent">Blok</button>
+                            </div>
+                        </form>
+                        {% if user.blocked_until %}
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/unblock" class="mt-2">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Vaqtinchalik blokni olib tashlash</button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Subscription extend -->
+                    <div class="action-box">
+                        <div class="action-label"><i class="bi bi-gem"></i> Obunani uzaytirish (kun)</div>
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/subscription">
+                            <div class="input-group">
+                                <input type="number" name="days" class="form-control" placeholder="30" min="1" required>
+                                <button type="submit" class="btn btn-accent">Uzaytirish</button>
+                            </div>
+                        </form>
+                        {% if user.subscription_end %}
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/subscription/remove" class="mt-2"
+                              data-confirm="Obunani bekor qilishni tasdiqlaysizmi?">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Obunani bekor qilish</button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Message block -->
+                    <div class="action-box">
+                        <div class="action-label"><i class="bi bi-chat-square-x"></i> Reklama bloki (soat)</div>
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/msg-block">
+                            <div class="input-group">
+                                <input type="number" name="hours" class="form-control" placeholder="24" min="1" required>
+                                <button type="submit" class="btn btn-outline-accent">Cheklash</button>
+                            </div>
+                        </form>
+                        {% if user.msg_blocked_until %}
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/msg-unblock" class="mt-2">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Reklama blokini olib tashlash</button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Trial -->
+                    <div class="action-box">
+                        <div class="action-label"><i class="bi bi-gift"></i> Sinov xabarlari soni</div>
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/trial">
+                            <div class="input-group">
+                                <input type="number" name="count" class="form-control" value="{{ user.trial_messages_left }}" min="0" required>
+                                <button type="submit" class="btn btn-accent">Saqlash</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BROADCAST CONTROL -->
+            <div class="info-card mb-4">
+                <div class="card-header-custom">
+                    <i class="bi bi-broadcast" style="color: var(--info);"></i>
+                    Tarqatish boshqaruvi
+                </div>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        {% if message and message.is_running %}
+                            <span class="badge bg-success p-2">🚀 Hozir ishlamoqda</span>
+                        {% else %}
+                            <span class="badge bg-secondary p-2">🛑 To'xtatilgan</span>
+                        {% endif %}
+                        {% if message and message.started_running_at %}
+                            <small class="text-muted ms-2">Boshlangan: {{ message.started_running_at[:16] | replace("T", " ") }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/broadcast/start">
+                            <button type="submit" class="btn btn-success" style="border-radius:10px; font-weight:600;">
+                                <i class="bi bi-play-fill"></i> Boshlash
+                            </button>
+                        </form>
+                        <form method="POST" action="/admin/users/{{ user.telegram_id }}/broadcast/stop">
+                            <button type="submit" class="btn btn-outline-accent" style="font-weight:600;">
+                                <i class="bi bi-stop-fill"></i> To'xtatish
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AD MESSAGE EDIT -->
+            <div class="info-card mb-4">
+                <div class="card-header-custom">
+                    <i class="bi bi-chat-left-text-fill" style="color: var(--accent);"></i>
+                    Reklama matni va sozlamalari
+                </div>
+                <form method="POST" action="/admin/users/{{ user.telegram_id }}/message">
+                    <div class="mb-3">
+                        <label class="form-label text-muted" style="font-size:12px; font-weight:600; text-transform:uppercase;">Reklama matni</label>
+                        <textarea name="message_text" class="form-control" rows="5" placeholder="Reklama matnini kiriting...">{{ message.message_text if message and message.message_text else '' }}</textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted" style="font-size:12px; font-weight:600; text-transform:uppercase;">Interval (daqiqa, min {{ min_interval }})</label>
+                            <input type="number" name="interval_minutes" class="form-control" min="{{ min_interval }}"
+                                   value="{{ message.interval_minutes if message and message.interval_minutes else min_interval }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted" style="font-size:12px; font-weight:600; text-transform:uppercase;">Davomiylik (soat, 0 = cheksiz)</label>
+                            <input type="number" name="duration_hours" class="form-control" min="0"
+                                   value="{{ message.duration_hours if message and message.duration_hours else 0 }}">
+                        </div>
+                    </div>
+                    <div class="mt-3 text-end">
+                        <button type="submit" class="btn btn-accent"><i class="bi bi-save me-1"></i> Saqlash</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- GROUPS -->
+            <div class="data-table mb-4">
+                <div class="p-3 px-4" style="background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color);">
+                    <h6 class="mb-0" style="font-weight: 600;">
+                        <i class="bi bi-people-fill me-2" style="color: var(--accent);"></i>
+                        Ulangan guruhlar ({{ active_group_count }}/{{ groups|length }} faol)
+                    </h6>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Guruh nomi</th>
+                            <th>Chat ID</th>
+                            <th>Holat</th>
+                            <th class="text-end">Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in groups %}
+                        <tr>
+                            <td style="font-weight: 500;">{{ group.group_title or 'Nomsiz guruh' }}</td>
+                            <td><span style="font-family: monospace; font-size: 13px;">{{ group.chat_id }}</span></td>
+                            <td>
+                                {% if group.is_active %}
+                                    <span class="badge bg-success">Faol</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">O'chirilgan</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <form method="POST" action="/admin/users/{{ user.telegram_id }}/groups/{{ group.id }}/toggle">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Yoqish/o'chirish">
+                                            {% if group.is_active %}<i class="bi bi-toggle-on"></i>{% else %}<i class="bi bi-toggle-off"></i>{% endif %}
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="/admin/users/{{ user.telegram_id }}/groups/{{ group.id }}/delete"
+                                          data-confirm="Guruhni o'chirishni tasdiqlaysizmi?">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="O'chirish">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not groups %}
+                        <tr>
+                            <td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">
+                                <i class="bi bi-folder-x" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+                                Guruhlar ulanmagan
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- DANGER ZONE -->
+            <div class="info-card" style="border-color: rgba(233,69,96,0.4);">
+                <div class="card-header-custom" style="color: var(--accent);">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    Xavfli zona
+                </div>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="text-muted" style="font-size: 13px;">
+                        Foydalanuvchini o'chirish — uning barcha guruhlari, reklamalari va statistikasi
+                        bilan birga butunlay o'chiriladi. Bu amalni qaytarib bo'lmaydi.
+                    </div>
+                    <form method="POST" action="/admin/users/{{ user.telegram_id }}/delete"
+                          data-confirm="DIQQAT! Foydalanuvchi va uning barcha ma'lumotlari butunlay o'chiriladi. Davom etasizmi?">
+                        <button type="submit" class="btn btn-danger" style="border-radius:10px; font-weight:600;">
+                            <i class="bi bi-trash3-fill me-1"></i> Foydalanuvchini o'chirish
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

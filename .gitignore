@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  MAXFIY MA'LUMOTLAR — HECH QACHON GitHub'ga TUSHMASLIGI KERAK!
+# ═══════════════════════════════════════════════════════════════════════════
+.env
+.env.*
+!.env.example          # namuna fayl saqlanadi (maxfiy emas)
+
+# Telegram / Pyrogram sessiya fayllari (akkaunt kalitlari!)
+*.session
+*.session-journal
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Python
+# ═══════════════════════════════════════════════════════════════════════════
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+.dist/
+*.manifest
+*.spec
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.cache/
+.mypy_cache/
+.ruff_cache/
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  IDE / Muharrirlar
+# ═══════════════════════════════════════════════════════════════════════════
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Loglar va vaqtinchalik fayllar
+# ═══════════════════════════════════════════════════════════════════════════
+*.log
+logs/
+*.tmp
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Operatsion tizim fayllari
+# ═══════════════════════════════════════════════════════════════════════════
+.DS_Store
+Thumbs.db
+desktop.ini

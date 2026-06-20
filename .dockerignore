@@ -1,0 +1,27 @@
+# Maxfiy ma'lumotlar — image ichiga TUSHMASLIGI kerak
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Git va IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+
+# Pyrogram session fayllari (agar mahalliy yaratilgan bo'lsa)
+*.session
+*.session-journal
+
+# Loglar va vaqtinchalik fayllar
+*.log
+.dist/
+.DS_Store

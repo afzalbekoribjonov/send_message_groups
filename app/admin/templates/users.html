@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Taksilar – Xabarchi Bot{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block page_title %}Taksilar Ro'yxati{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+
+    <!-- SEARCH & INFO HEADER -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div style="flex: 1; max-width: 400px;">
+            <div class="position-relative">
+                <input type="text" id="searchInput" class="search-box" placeholder="Qidirish (Telegram ID, ism, raqam)...">
+                <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-3" style="color: var(--text-muted);"></i>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="btn btn-sm btn-outline-secondary" style="border-color: var(--border-color); color: var(--text-muted);">
+                Jami: <b>{{ users|length }}</b> taksi
+            </span>
+        </div>
+    </div>
+
+    <!-- USERS TABLE -->
+    <div class="data-table">
+        <table class="table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>Telegram ID</th>
+                    <th>Foydalanuvchi</th>
+                    <th>Ism</th>
+                    <th>Telefon</th>
+                    <th>Til</th>
+                    <th>Holat</th>
+                    <th>Trial</th>
+                    <th>Obuna tugash muddati</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="clickable-row" onclick="window.location='/admin/users/{{ user.telegram_id }}'">
+                    <td>
+                        <span style="font-family: monospace; font-weight: 600;">
+                            {{ user.telegram_id }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.username %}
+                            <span style="color: var(--info);">@{{ user.username }}</span>
+                        {% else %}
+                            <span style="color: var(--text-muted);">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.first_name or '—' }}</td>
+                    <td>
+                        {% if user.phone_number %}
+                            <span style="font-family: monospace;">{{ user.phone_number }}</span>
+                        {% else %}
+                            <span style="color: var(--text-muted);">Ulanmagan</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.language == 'uz_lat' %}
+                            🇺🇿 Lotin
+                        {% elif user.language == 'uz_cyr' %}
+                            🇺🇿 Кирилл
+                        {% else %}
+                            {{ user.language or '—' }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.status == 'active' %}
+                            <span class="status-badge badge-active">Faol</span>
+                        {% elif user.status == 'blocked' %}
+                            <span class="status-badge badge-blocked">Bloklangan</span>
+                        {% elif user.status == 'new' %}
+                            <span class="status-badge badge-new">Yangi</span>
+                        {% else %}
+                            <span class="status-badge badge-trial">{{ user.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge rounded-pill {% if user.trial_messages_left > 0 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                            {{ user.trial_messages_left }} / 15
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.subscription_end %}
+                            <span style="font-weight: 500;">
+                                {{ user.subscription_end[:16] | replace("T", " ") }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">Faol emas</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not users %}
+                <tr>
+                    <td colspan="8" class="text-center" style="padding: 40px; color: var(--text-muted);">
+                        <i class="bi bi-people" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+                        Tizimda taksilar mavjud emas
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Live Search Logic
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const query = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#usersTable tbody tr');
+
+        rows.forEach(row => {
+            // Skip empty placeholder row if exists
+            if (row.cells.length < 8) return;
+
+            const tgId = row.cells[0].textContent.toLowerCase();
+            const username = row.cells[1].textContent.toLowerCase();
+            const name = row.cells[2].textContent.toLowerCase();
+            const phone = row.cells[3].textContent.toLowerCase();
+
+            if (tgId.includes(query) || username.includes(query) || name.includes(query) || phone.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

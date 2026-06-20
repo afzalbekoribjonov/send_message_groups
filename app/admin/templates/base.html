@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="uz" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Xabarchi Bot – Admin{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-sidebar: #0a0a1a;
+            --accent: #e94560;
+            --accent-hover: #ff6b81;
+            --text-primary: #e8e8e8;
+            --text-muted: #8892b0;
+            --border-color: #233554;
+            --success: #00d68f;
+            --warning: #ffaa00;
+            --info: #0095ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ────────────────────────────────────────────── */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-brand .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), #ff6b81);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .sidebar-brand h5 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-brand small {
+            color: var(--text-muted);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+        }
+
+        .sidebar-nav .nav-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 12px 16px 8px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-nav .nav-link:hover {
+            background: rgba(233, 69, 96, 0.1);
+            color: var(--accent);
+        }
+
+        .sidebar-nav .nav-link.active {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.15), rgba(233, 69, 96, 0.05));
+            color: var(--accent);
+            border: 1px solid rgba(233, 69, 96, 0.2);
+        }
+
+        .sidebar-nav .nav-link i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* ── TOP NAVBAR ─────────────────────────────────────────── */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 260px;
+            right: 0;
+            height: 64px;
+            background: rgba(15, 15, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+
+        .topbar h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .topbar .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topbar .admin-badge .avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), #ff6b81);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .btn-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        /* ── MAIN CONTENT ───────────────────────────────────────── */
+        .main-content {
+            margin-left: 260px;
+            margin-top: 64px;
+            padding: 28px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ── CARDS ──────────────────────────────────────────────── */
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 16px;
+            line-height: 1;
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .gradient-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .gradient-2 { background: linear-gradient(135deg, #00d68f, #00b894); }
+        .gradient-3 { background: linear-gradient(135deg, #0095ff, #0078d4); }
+        .gradient-4 { background: linear-gradient(135deg, #e94560, #c23152); }
+
+        /* ── TABLE ──────────────────────────────────────────────── */
+        .data-table {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .data-table .table {
+            margin-bottom: 0;
+            color: var(--text-primary);
+        }
+
+        .data-table .table thead th {
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 14px 16px;
+        }
+
+        .data-table .table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(35, 53, 84, 0.5);
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .data-table .table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .data-table .table tbody tr:hover {
+            background: rgba(233, 69, 96, 0.05);
+        }
+
+        .data-table .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .clickable-row { cursor: pointer; }
+
+        /* ── BADGES ─────────────────────────────────────────────── */
+        .badge-active {
+            background: rgba(0, 214, 143, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(0, 214, 143, 0.3);
+        }
+
+        .badge-blocked {
+            background: rgba(233, 69, 96, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .badge-new {
+            background: rgba(0, 149, 255, 0.15);
+            color: var(--info);
+            border: 1px solid rgba(0, 149, 255, 0.3);
+        }
+
+        .badge-trial {
+            background: rgba(255, 170, 0, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ── BUTTONS ────────────────────────────────────────────── */
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), #c23152);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-accent:hover {
+            background: linear-gradient(135deg, var(--accent-hover), var(--accent));
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-outline-accent {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-accent:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* ── INFO CARD ──────────────────────────────────────────── */
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .info-card .card-header-custom {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(35, 53, 84, 0.4);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item .label {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .info-item .value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* ── SEARCH ─────────────────────────────────────────────── */
+        .search-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+        }
+
+        .search-box::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ── FORM CONTROLS ──────────────────────────────────────── */
+        .form-control, .form-select {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 10px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+        }
+
+        /* ── RESPONSIVE ─────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .topbar {
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .btn-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* ── SCROLLBAR ──────────────────────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ── FADE IN ────────────────────────────────────────────── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* ── FLASH ALERT ────────────────────────────────────────── */
+        .flash-alert {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        .flash-alert i { font-size: 18px; }
+        .flash-alert .flash-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .flash-alert .flash-close:hover { opacity: 1; }
+        .flash-success {
+            background: rgba(0, 214, 143, 0.12);
+            border-color: rgba(0, 214, 143, 0.35);
+            color: var(--success);
+        }
+        .flash-warning {
+            background: rgba(255, 170, 0, 0.12);
+            border-color: rgba(255, 170, 0, 0.35);
+            color: var(--warning);
+        }
+        .flash-danger {
+            background: rgba(233, 69, 96, 0.12);
+            border-color: rgba(233, 69, 96, 0.35);
+            color: var(--accent-hover);
+        }
+
+        /* ── ACTION SECTIONS ────────────────────────────────────── */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .action-box {
+            background: rgba(0, 0, 0, 0.18);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .action-box .action-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-megaphone-fill"></i>
+            </div>
+            <div>
+                <h5>Xabarchi</h5>
+                <small>Admin Panel</small>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Asosiy</div>
+            <a href="/admin/dashboard" class="nav-link {% block nav_dashboard %}{% endblock %}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                Dashboard
+            </a>
+            <a href="/admin/users" class="nav-link {% block nav_users %}{% endblock %}">
+                <i class="bi bi-people-fill"></i>
+                Taksilar
+            </a>
+
+            <div class="nav-label mt-4">Tizim</div>
+            <a href="/admin/logout" class="nav-link">
+                <i class="bi bi-box-arrow-left"></i>
+                Chiqish
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center px-3" style="gap: 10px;">
+                <div class="avatar" style="width:32px;height:32px;background:linear-gradient(135deg,var(--accent),#ff6b81);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;">
+                    {{ (admin.username[0] if admin and admin.username else 'A') | upper }}
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:600;">{{ admin.username if admin else 'Admin' }}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">{{ admin.role if admin and admin.role else 'Boshqaruvchi' }}</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn-menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')">
+                <i class="bi bi-list"></i>
+            </button>
+            <h6>{% block page_title %}Dashboard{% endblock %}</h6>
+        </div>
+        <div class="admin-badge">
+            <span style="font-size:13px;color:var(--text-muted);">
+                {{ admin.username if admin else 'Admin' }}
+            </span>
+            <div class="avatar">
+                {{ (admin.username[0] if admin and admin.username else 'A') | upper }}
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        {% if flash %}
+        <div class="flash-alert flash-{{ ftype or 'success' }} fade-in" role="alert">
+            <i class="bi {% if ftype == 'danger' %}bi-x-octagon-fill{% elif ftype == 'warning' %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %}"></i>
+            <span>{{ flash }}</span>
+            <button type="button" class="flash-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Tasdiqlash kerak bo'lgan formalar (data-confirm atributi)
+        document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (!window.confirm(form.getAttribute('data-confirm'))) {
+                    e.preventDefault();
+                }
+            });
+        });
+        // Flash xabarni 6 soniyadan keyin avtomatik yopish
+        setTimeout(function () {
+            document.querySelectorAll('.flash-alert').forEach(function (el) {
+                el.style.transition = 'opacity .4s ease';
+                el.style.opacity = '0';
+                setTimeout(function () { el.remove(); }, 400);
+            });
+        }, 6000);
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Telegram Bot Framework
+aiogram==3.15.0
+
+# Telegram Userbot (akkauntdan xabar yuborish)
+Pyrogram==2.0.106
+TgCrypto==1.2.5
+
+# Web Framework (Admin Panel)
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+Jinja2==3.1.5
+python-multipart==0.0.19
+
+# Database (Supabase)
+supabase==2.11.0
+httpx==0.28.1
+
+# Scheduler
+APScheduler==3.10.4
+
+# Security
+bcrypt==3.2.2
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# Utilities
+aiofiles==24.1.0

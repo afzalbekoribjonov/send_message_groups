@@ -1,0 +1,23 @@
+services:
+  web:
+    build: .
+    container_name: xabarchi_bot_app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+    restart: always
+
+# ── Lokal ishlab chiqish (development) uchun ────────────────────────────────
+# Yuqoridagi sozlama serverga (production) mo'ljallangan. Lokalda kod
+# o'zgarganda avtomatik qayta yuklash (hot-reload) kerak bo'lsa, quyidagi
+# qatorlarni `web` xizmatiga qo'shing:
+#
+#   volumes:
+#     - .:/app
+#   command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+#   environment:
+#     - PORT=8000
+#     - DEBUG=true
