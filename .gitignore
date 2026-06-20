@@ -9,6 +9,9 @@
 *.session
 *.session-journal
 
+# Ichki loyiha hujjatlari (GitHub'ga chiqmasligi kerak)
+loyiha_rejasi.txt
+
 # ═══════════════════════════════════════════════════════════════════════════
 #  Python
 # ═══════════════════════════════════════════════════════════════════════════

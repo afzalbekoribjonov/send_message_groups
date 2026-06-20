@@ -21,6 +21,9 @@ env/
 *.session
 *.session-journal
 
+# Ichki loyiha hujjatlari
+loyiha_rejasi.txt
+
 # Loglar va vaqtinchalik fayllar
 *.log
 .dist/
