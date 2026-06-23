@@ -125,6 +125,40 @@ TEXTS: dict[str, str] = {
         "Holat: <b>{status}</b>"
     ),
 
+    # ── Avtomatik ogohlantirishlar (scheduler yuboradi) ──────────────────────
+    "notify_trial_expired": (
+        "⏰ <b>Bepul sinov tugadi!</b>\n\n"
+        "Sinov xabarlaringiz tugagani uchun tarqatish <b>avtomatik to'xtatildi</b>.\n\n"
+        "Cheksiz xabar yuborish uchun obuna oling 👇\n"
+        "📞 {support_phone}\n"
+        "💬 {support_username}"
+    ),
+    "notify_subscription_expired": (
+        "⏰ <b>Obunangiz muddati tugadi!</b>\n\n"
+        "Shu sababli tarqatish <b>avtomatik to'xtatildi</b>.\n\n"
+        "Obunani yangilash uchun 👇\n"
+        "📞 {support_phone}\n"
+        "💬 {support_username}"
+    ),
+    "notify_trial_low": (
+        "⚠️ <b>Diqqat!</b> Bepul sinovdan atigi <b>{left}</b> ta xabar qoldi.\n\n"
+        "Uzluksiz ishlash uchun obuna olishni o'ylab ko'ring: {support_username}"
+    ),
+    "notify_blocked": (
+        "🚫 <b>Hisobingiz bloklandi.</b>\n\n"
+        "Tarqatish to'xtatildi. Ma'lumot uchun: {support_username}"
+    ),
+    "notify_duration_done": (
+        "✅ Belgilangan vaqt (<b>{hours} soat</b>) tugadi.\n"
+        "Tarqatish avtomatik to'xtatildi. Qaytadan boshlashingiz mumkin."
+    ),
+    "notify_stopped": "🛑 Tarqatish to'xtatildi.",
+
+    # ── Tarif holati (statistikada ko'rsatiladi) ─────────────────────────────
+    "plan_subscribed": "💎 <b>Tarif:</b> Obuna faol ({date} gacha) — cheksiz xabar",
+    "plan_trial": "🎁 <b>Tarif:</b> Bepul sinov — <b>{left}</b> ta xabar qoldi",
+    "plan_expired": "⛔ <b>Tarif:</b> Bepul sinov tugagan. Obuna oling.",
+
     # ── Xatolik ─────────────────────────────────────────────────────────────
     "error_generic": "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
 

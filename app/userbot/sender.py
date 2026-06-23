@@ -18,33 +18,24 @@ from app.userbot.session_manager import get_client
 logger = logging.getLogger(__name__)
 
 
-async def send_to_groups(telegram_id: int) -> dict:
+async def send_to_groups(telegram_id: int, reason: str = "trial") -> dict:
     """
     Foydalanuvchining reklama xabarini barcha faol guruhlariga yuboradi.
 
-    Jarayon:
-        1. Trial/subscription tekshiruvi
-        2. Pyrogram client yaratish
-        3. Har bir guruhga xabar yuborish (jitter bilan)
-        4. Statistikani yangilash
+    Ruxsat tekshiruvi (trial/obuna/blok) bu yerda emas, chaqiruvchi (scheduler
+    job) tomonida amalga oshiriladi — shunda holat o'zgarganda foydalanuvchi
+    ogohlantiriladi va broadcast to'xtatiladi.
 
     Args:
         telegram_id: Foydalanuvchining Telegram ID'si.
+        reason: Yuborish asosi ("trial" yoki "subscribed"). "trial" bo'lsa
+                muvaffaqiyatli yuborilgach sinov xabarlari soni kamaytiriladi.
 
     Returns:
-        dict: {sent: int, failed: int, errors: list[str]}
+        dict: {sent, failed, errors, trial_left}
+              trial_left — sinov kamaytirilgan bo'lsa qolgan miqdor, aks holda None.
     """
-    stats = {"sent": 0, "failed": 0, "errors": []}
-
-    # ── 1. Yuborish huquqini tekshirish ──────────────────────────────────────
-    can_send, reason = db.can_send_message(telegram_id)
-    if not can_send:
-        logger.info(
-            "Yuborish rad etildi: telegram_id=%s, sabab=%s",
-            telegram_id, reason,
-        )
-        stats["errors"].append(f"Yuborish rad etildi: {reason}")
-        return stats
+    stats = {"sent": 0, "failed": 0, "errors": [], "trial_left": None}
 
     # ── 2. Xabar matnini olish ───────────────────────────────────────────────
     msg_data = db.get_user_message(telegram_id)
@@ -148,7 +139,7 @@ async def send_to_groups(telegram_id: int) -> dict:
 
     # ── 6. Trial xabarni kamaytirish ────────────────────────────────────────
     if reason == "trial" and stats["sent"] > 0:
-        db.decrement_trial(telegram_id)
+        stats["trial_left"] = db.decrement_trial(telegram_id)
 
     # ── 7. last_sent vaqtini yangilash ───────────────────────────────────────
     if stats["sent"] > 0:

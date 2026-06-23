@@ -360,7 +360,7 @@ class SupabaseDB:
         """Faol (is_running=True) barcha xabarlarni olish."""
         result = (
             self.client.table("user_messages")
-            .select("*, users!inner(telegram_id, session_string, status, "
+            .select("*, users!inner(telegram_id, language, session_string, status, "
                     "trial_messages_left, subscription_end, "
                     "blocked_until, msg_blocked_until)")
             .eq("is_running", True)

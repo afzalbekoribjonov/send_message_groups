@@ -8,6 +8,7 @@ tarqatishni boshlash/to'xtatish, yangilash va yopish.
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -44,6 +45,28 @@ def _get_status_text(user: dict | None, lang: str) -> str:
     return status_map_lat.get(status, status)
 
 
+def _plan_text(user: dict | None, lang: str) -> str:
+    """Foydalanuvchining tarif holatini (obuna/sinov) matnga aylantiradi."""
+    if not user:
+        return get_text("plan_expired", lang)
+
+    sub_end = user.get("subscription_end")
+    if sub_end:
+        try:
+            dt = datetime.fromisoformat(sub_end)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            if dt > datetime.now(timezone.utc):
+                return get_text("plan_subscribed", lang).format(date=sub_end[:10])
+        except (ValueError, TypeError):
+            pass
+
+    trial_left = user.get("trial_messages_left", 0)
+    if trial_left > 0:
+        return get_text("plan_trial", lang).format(left=trial_left)
+    return get_text("plan_expired", lang)
+
+
 def _render_stats(telegram_id: int, lang: str) -> tuple[str, object]:
     """Statistika matni va inline klaviaturasini tayyorlaydi."""
     user = db.get_user(telegram_id)
@@ -62,10 +85,13 @@ def _render_stats(telegram_id: int, lang: str) -> tuple[str, object]:
         trial_left=trial_left,
         status=status_text,
     )
+    # Tarif holati (obuna faol / sinov / tugagan)
+    text += "\n\n" + _plan_text(user, lang)
+    # Tarqatish holati
     if is_running:
-        text += "\n\n" + get_text("broadcast_state_running", lang)
+        text += "\n" + get_text("broadcast_state_running", lang)
     else:
-        text += "\n\n" + get_text("broadcast_state_stopped", lang)
+        text += "\n" + get_text("broadcast_state_stopped", lang)
 
     return text, stats_kb(lang, is_running)
 
