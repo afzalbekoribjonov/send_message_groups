@@ -31,7 +31,15 @@ ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin")
 # ── Server ───────────────────────────────────────────────────────────────────
 PORT: int = int(os.getenv("PORT", "8000"))
 DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
-WEBAPP_URL: str = os.getenv("WEBAPP_URL", "https://your-domain.com/webapp/groups")
+
+# Render.com avtomatik ravishda RENDER_EXTERNAL_HOSTNAME o'zgaruvchisini beradi
+RENDER_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_HOSTNAME:
+    DEFAULT_WEBAPP_URL = f"https://{RENDER_HOSTNAME}/webapp/groups"
+else:
+    DEFAULT_WEBAPP_URL = "https://your-domain.com/webapp/groups"
+
+WEBAPP_URL: str = os.getenv("WEBAPP_URL", DEFAULT_WEBAPP_URL)
 
 # ── Xabar yuborish cheklovlari ──────────────────────────────────────────────
 MIN_INTERVAL_MINUTES: int = 2          # Minimal xabar yuborish oralig'i (daqiqa)
