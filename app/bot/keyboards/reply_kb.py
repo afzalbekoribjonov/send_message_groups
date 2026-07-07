@@ -73,8 +73,7 @@ def settings_kb(lang: str = "uz_lat", is_linked: bool = False) -> ReplyKeyboardM
     """Sozlamalar pastki menyusi."""
     kb = [
         [
-            KeyboardButton(text=get_text("btn_lang_lat", lang)),
-            KeyboardButton(text=get_text("btn_lang_cyr", lang)),
+            KeyboardButton(text=get_text("btn_change_lang", lang)),
         ]
     ]
     if is_linked:

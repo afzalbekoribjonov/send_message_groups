@@ -59,18 +59,6 @@ async def send_to_groups(telegram_id: int, reason: str = "trial") -> dict:
 
     # ── 5. Xabarlarni yuborish ───────────────────────────────────────────────
     try:
-        await client.start()
-
-        # Pyrogram peer keshini to'ldirish.
-        # Yangi session_string'dan ishga tushgan client guruhlarning access_hash'ini
-        # bilmaydi — natijada send_message(chat_id) "PeerIdInvalid" xatosini beradi.
-        # get_dialogs() bir marta aylanib chiqilsa, barcha peerlar keshga yoziladi.
-        try:
-            async for _ in client.get_dialogs():
-                pass
-        except Exception as e:
-            logger.warning("Peer keshini to'ldirishda ogohlantirish (user=%s): %s", telegram_id, e)
-
         for i, group in enumerate(groups):
             chat_id = group["chat_id"]
             try:
@@ -131,15 +119,10 @@ async def send_to_groups(telegram_id: int, reason: str = "trial") -> dict:
     except Exception as e:
         stats["errors"].append(f"Client xatosi: {e}")
         logger.error("Client xatosi: user=%s, err=%s", telegram_id, e)
-    finally:
-        try:
-            await client.stop()
-        except Exception:
-            pass
 
     # ── 6. Trial xabarni kamaytirish ────────────────────────────────────────
     if reason == "trial" and stats["sent"] > 0:
-        stats["trial_left"] = db.decrement_trial(telegram_id)
+        stats["trial_left"] = db.decrement_trial(telegram_id, count=stats["sent"])
 
     # ── 7. last_sent vaqtini yangilash ───────────────────────────────────────
     if stats["sent"] > 0:

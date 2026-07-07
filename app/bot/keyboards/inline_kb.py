@@ -83,22 +83,16 @@ def confirm_logout_kb(lang: str = "uz_lat") -> InlineKeyboardMarkup:
     ])
 
 
-def groups_kb(groups: list[dict], lang: str = "uz_lat") -> InlineKeyboardMarkup:
-    """Guruhlar ro'yxati — har bir guruh uchun toggle tugma.
+from aiogram.types import WebAppInfo
 
-    Args:
-        groups: guruhlar ro'yxati (har birida 'id', 'group_title', 'is_active').
-        lang:   til kodi (hozircha faqat emoji uchun ishlatiladi).
-    """
-    rows = []
-    for group in groups:
-        status_emoji = "✅" if group.get("is_active") else "❌"
-        title = group.get("group_title", "Nomsiz guruh")
-        group_id = group.get("id", "")
-        rows.append([
+def groups_webapp_kb(lang: str = "uz_lat") -> InlineKeyboardMarkup:
+    """Guruhlarni boshqarish uchun WebApp tugmasi."""
+    from app.config import WEBAPP_URL
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
             InlineKeyboardButton(
-                text=f"{status_emoji} {title}",
-                callback_data=f"toggle_group_{group_id}",
+                text=get_text("btn_groups", lang) + " 🛠",
+                web_app=WebAppInfo(url=WEBAPP_URL)
             )
-        ])
-    return InlineKeyboardMarkup(inline_keyboard=rows) if rows else InlineKeyboardMarkup(inline_keyboard=[])
+        ]
+    ])

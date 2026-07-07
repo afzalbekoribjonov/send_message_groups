@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guruhlarni sozlash</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/static/css/webapp.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Guruhlarni boshqarish</h1>
+        <p id="stats-text">Yuklanmoqda...</p>
+    </div>
+
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Guruhlar ro'yxati olinmoqda...</p>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <div class="empty-icon">📁</div>
+            <h2>Guruhlar topilmadi</h2>
+            <p style="margin-top: 8px;">Sizda hali guruhlar yo'q yoki Telegram profilingizdan guruhlar topilmadi.</p>
+        </div>
+
+        <div id="group-list" class="group-list">
+            <!-- Guruhlar js orqali render qilinadi -->
+        </div>
+    </div>
+
+    <!-- MainButton API from Telegram WebApp is usually better, but we can also provide a fallback HTML button -->
+    <!-- We will use Telegram's native MainButton for a better experience -->
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Expand to full height
+
+        const initData = tg.initData;
+        let groups = [];
+        let originalStates = {};
+        let maxGroups = 15;
+
+        // Apply dark theme class if needed
+        if (tg.colorScheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+
+        async function fetchGroups() {
+            try {
+                const response = await fetch(`/webapp/api/groups?initData=${encodeURIComponent(initData)}`);
+                if (!response.ok) {
+                    throw new Error("API xatosi");
+                }
+                const data = await response.json();
+                groups = data.groups;
+                maxGroups = data.max_groups;
+                
+                groups.forEach(g => {
+                    originalStates[g.id] = g.is_active;
+                });
+                
+                renderGroups();
+                updateStats();
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').innerHTML = `<p style="color: var(--danger-color)">Xatolik yuz berdi. Qaytadan urinib ko'ring.</p>`;
+            }
+        }
+
+        function renderGroups() {
+            document.getElementById('loading').style.display = 'none';
+            const listEl = document.getElementById('group-list');
+            const emptyEl = document.getElementById('empty-state');
+            
+            if (!groups || groups.length === 0) {
+                emptyEl.style.display = 'block';
+                return;
+            }
+            
+            listEl.innerHTML = '';
+            
+            groups.forEach(group => {
+                const card = document.createElement('div');
+                card.className = 'group-card';
+                card.onclick = (e) => {
+                    // Prevent toggle if they clicked exactly on the input
+                    if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'SPAN') {
+                        const checkbox = document.getElementById(`toggle-${group.id}`);
+                        checkbox.checked = !checkbox.checked;
+                        handleToggleChange(group.id, checkbox.checked);
+                    }
+                };
+                
+                card.innerHTML = `
+                    <div class="group-info">
+                        <div class="group-title">${escapeHtml(group.group_title || 'Nomsiz guruh')}</div>
+                        <div class="group-id">${group.chat_id}</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-${group.id}" ${group.is_active ? 'checked' : ''} onchange="handleToggleChange('${group.id}', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                `;
+                listEl.appendChild(card);
+            });
+
+            // Setup Main Button
+            tg.MainButton.text = "SAQLASH";
+            tg.MainButton.color = tg.themeParams.button_color || "#34c759";
+            tg.MainButton.onClick(saveChanges);
+        }
+
+        function handleToggleChange(id, isChecked) {
+            // Update local state
+            const group = groups.find(g => g.id === id);
+            if (group) {
+                group.is_active = isChecked;
+            }
+            updateStats();
+            checkChanges();
+        }
+
+        function updateStats() {
+            const activeCount = groups.filter(g => g.is_active).length;
+            const textEl = document.getElementById('stats-text');
+            textEl.innerText = `${activeCount} / ${maxGroups} faol guruhlar`;
+            
+            if (activeCount > maxGroups) {
+                textEl.style.color = 'var(--danger-color)';
+            } else {
+                textEl.style.color = 'var(--hint-color)';
+            }
+        }
+
+        function checkChanges() {
+            let hasChanges = false;
+            let activeCount = 0;
+            
+            groups.forEach(g => {
+                if (g.is_active !== originalStates[g.id]) {
+                    hasChanges = true;
+                }
+                if (g.is_active) {
+                    activeCount++;
+                }
+            });
+
+            if (hasChanges) {
+                if (activeCount > maxGroups) {
+                    tg.MainButton.hide();
+                    tg.showAlert(`Maksimal ${maxGroups} ta guruh belgilash mumkin!`);
+                } else {
+                    tg.MainButton.show();
+                }
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        async function saveChanges() {
+            tg.MainButton.showProgress();
+            
+            // Gather updates
+            const updates = groups
+                .filter(g => g.is_active !== originalStates[g.id])
+                .map(g => ({ group_id: g.id, is_active: g.is_active }));
+                
+            try {
+                const response = await fetch('/webapp/api/groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        initData: initData,
+                        updates: updates
+                    })
+                });
+                
+                if (response.ok) {
+                    tg.MainButton.hideProgress();
+                    tg.close();
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.detail || "Xatolik");
+                }
+            } catch (err) {
+                tg.MainButton.hideProgress();
+                tg.showAlert(`Xatolik yuz berdi: ${err.message}`);
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // Initialize
+        tg.ready();
+        fetchGroups();
+    </script>
+</body>
+</html>

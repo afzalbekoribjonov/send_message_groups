@@ -174,6 +174,7 @@ TEXTS: dict[str, str] = {
     "btn_back": "⬅️ Ортга",
     "btn_lang_lat": "🇺🇿 O'zbekcha (Lotin)",
     "btn_lang_cyr": "🇺🇿 Ўзбекча (Кирилл)",
+    "btn_change_lang": "🌐 Тилни ўзгартириш",
     "btn_interval": "⏱ Интервал",
     "btn_duration": "⏳ Давомийлик",
     "btn_logout": "🚪 Ҳисобдан чиқиш",

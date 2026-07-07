@@ -153,7 +153,7 @@ async def broadcast_job() -> None:
                         ),
                     )
                     logger.info("Sinov tugadi, to'xtatildi: user=%s", telegram_id)
-                elif trial_left is not None and trial_left == TRIAL_LOW_THRESHOLD:
+                elif trial_left is not None and trial_left <= TRIAL_LOW_THRESHOLD and trial_left > 0:
                     await _notify(
                         telegram_id,
                         get_text("notify_trial_low", lang).format(

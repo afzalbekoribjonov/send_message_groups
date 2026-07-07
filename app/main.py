@@ -17,6 +17,7 @@ from app.config import DEBUG, PORT, ADMIN_USERNAME, ADMIN_PASSWORD
 from app.database.supabase_client import db
 from app.admin.auth import hash_password
 from app.admin.routes import router as admin_router
+from app.webapp.routes import router as webapp_router
 from app.bot.bot import start_bot
 from app.scheduler.jobs import setup_scheduler
 
@@ -88,7 +89,7 @@ async def lifespan(app: FastAPI):
 
 # FastAPI ilovasi
 app = FastAPI(
-    title="Xabarchi Bot Admin Panel",
+    title="Xabarchi Bot",
     description="Taksi foydalanuvchilari uchun reklama tarqatuvchi tizim",
     version="1.0.0",
     lifespan=lifespan,
@@ -96,8 +97,13 @@ app = FastAPI(
     redoc_url=None,
 )
 
-# Admin panel yo'nalishlarini ulash
+# Statik fayllarni ulash (WebApp CSS/JS uchun)
+import os
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "webapp", "static")), name="static")
+
+# Yo'nalishlarni ulash
 app.include_router(admin_router)
+app.include_router(webapp_router)
 
 
 @app.get("/")

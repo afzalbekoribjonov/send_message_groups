@@ -44,6 +44,24 @@ async def show_settings(
     )
 
 
+@router.message(F.text.in_({"🌐 Tilni o'zgartirish", "🌐 Тилни ўзгартириш"}))
+async def change_language(
+    message: Message,
+    state: FSMContext,
+    lang: str = "uz_lat",
+) -> None:
+    """Tilni o'zgartirish menyusini ko'rsatish."""
+    if not message.from_user:
+        return
+
+    from app.bot.keyboards.reply_kb import language_kb
+    await message.answer(
+        get_text("choose_language", lang),
+        reply_markup=language_kb(),
+        parse_mode="HTML",
+    )
+
+
 @router.message(F.text.in_({"⏱ Interval", "⏱ Интервал"}))
 async def ask_interval(
     message: Message,

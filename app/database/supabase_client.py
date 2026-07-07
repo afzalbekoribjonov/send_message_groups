@@ -177,12 +177,12 @@ class SupabaseDB:
         """
         self.client.table("users").delete().eq("telegram_id", telegram_id).execute()
 
-    def decrement_trial(self, telegram_id: int) -> int:
+    def decrement_trial(self, telegram_id: int, count: int = 1) -> int:
         """Bepul sinov xabarini kamaytirish. Qolgan miqdorni qaytaradi."""
         user = self.get_user(telegram_id)
         if not user:
             return 0
-        left = max(0, user.get("trial_messages_left", 0) - 1)
+        left = max(0, user.get("trial_messages_left", 0) - count)
         self.update_user(telegram_id, trial_messages_left=left)
         return left
 

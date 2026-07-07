@@ -31,6 +31,7 @@ ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin")
 # ── Server ───────────────────────────────────────────────────────────────────
 PORT: int = int(os.getenv("PORT", "8000"))
 DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
+WEBAPP_URL: str = os.getenv("WEBAPP_URL", "https://your-domain.com/webapp/groups")
 
 # ── Xabar yuborish cheklovlari ──────────────────────────────────────────────
 MIN_INTERVAL_MINUTES: int = 2          # Minimal xabar yuborish oralig'i (daqiqa)
