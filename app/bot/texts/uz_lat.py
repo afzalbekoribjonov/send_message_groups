@@ -23,9 +23,8 @@ TEXTS: dict[str, str] = {
     "stats_title": "📊 <b>Statistika</b>",
     "stats_info": (
         "📊 <b>Statistika</b>\n\n"
-        "✅ Yuborilgan: <b>{sent_count}</b>\n"
-        "❌ Xatolik: <b>{failed_count}</b>\n"
-        "🎁 Sinov qoldi: <b>{trial_left}</b>\n"
+        "👥 Jami guruhlar: <b>{total_groups}</b> ta\n"
+        "✅ Faol guruhlar: <b>{active_groups}</b> ta\n"
         "📡 Holat: <b>{status}</b>"
     ),
     "broadcast_state_running": "🟢 Tarqatish hozir <b>ishlamoqda</b>.",

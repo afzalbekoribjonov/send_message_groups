@@ -70,19 +70,18 @@ def _plan_text(user: dict | None, lang: str) -> str:
 def _render_stats(telegram_id: int, lang: str) -> tuple[str, object]:
     """Statistika matni va inline klaviaturasini tayyorlaydi."""
     user = db.get_user(telegram_id)
-    stats = db.get_stats(telegram_id)
     user_msg = db.get_user_message(telegram_id)
+    groups = db.get_user_groups(telegram_id)
 
-    sent_count = stats.get("sent_count", 0) if stats else 0
-    failed_count = stats.get("failed_count", 0) if stats else 0
-    trial_left = user.get("trial_messages_left", 0) if user else 0
+    total_groups = len(groups)
+    active_groups = sum(1 for g in groups if g.get("is_active"))
+    
     status_text = _get_status_text(user, lang)
     is_running = bool(user_msg and user_msg.get("is_running"))
 
     text = get_text("stats_info", lang).format(
-        sent_count=sent_count,
-        failed_count=failed_count,
-        trial_left=trial_left,
+        total_groups=total_groups,
+        active_groups=active_groups,
         status=status_text,
     )
     # Tarif holati (obuna faol / sinov / tugagan)
